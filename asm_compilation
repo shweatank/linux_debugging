@@ -1,0 +1,3 @@
+nasm -f elf32 loop_print.asm
+ld -m elf_i386 -o loop_print loop_print.o
+./loop_print
