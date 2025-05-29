@@ -1,0 +1,85 @@
+# Recompiling the Linux Kernel for TIO Linux with kdb+ Support
+
+This guide explains how to recompile the Linux kernel from scratch on **TIO Linux**, tailored for **kdb+**, a high-performance time-series database.
+
+---
+
+## ✅ Prerequisites
+
+- You have root (`sudo`) access.
+- You're using a Linux system compatible with TIO Linux (typically a minimal, performance-optimized distro).
+- You want kernel options optimized for **low latency**, **real-time processing**, and **debugging**.
+
+---
+
+## 🔧 Step-by-Step Instructions
+
+### Step 1: Install Required Tools
+
+```bash
+sudo apt update
+sudo apt install -y build-essential libncurses-dev bison flex libssl-dev libelf-dev bc
+Step 2: Download the Kernel Source
+
+cd /usr/src
+sudo wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.9.tar.xz
+sudo tar -xvf linux-6.9.tar.xz
+cd linux-6.9
+Step 3: Use Existing Kernel Config (Optional)
+
+cp /boot/config-$(uname -r) .config
+make olddefconfig
+Step 4: Configure the Kernel
+Use menuconfig to customize:
+
+
+make menuconfig
+Recommended Settings:
+
+CONFIG_PREEMPT=y — Preemptible Kernel
+
+CONFIG_HIGH_RES_TIMERS=y — High-resolution timers
+
+CONFIG_KALLSYMS=y — Useful for debugging
+
+CONFIG_KGDB, CONFIG_KDB — For interactive kernel debugging (optional)
+
+Disable unneeded drivers/filesystems for minimal footprint
+
+Step 5: Compile the Kernel
+
+make -j$(nproc)
+Step 6: Install Kernel Modules
+
+sudo make modules_install
+Step 7: Install the Kernel
+
+sudo make install
+Step 8: Update GRUB
+
+sudo update-grub
+Step 9: Reboot
+
+sudo reboot
+At boot, select the new kernel in GRUB if it's not selected by default.
+
+Step 10: Verify Kernel Version
+
+uname -r
+Expected output should reflect the new kernel version, e.g., 6.9.0.
+
+🧪 Optional Optimizations for kdb+
+Real-Time Performance:
+
+Consider applying the PREEMPT_RT patch if ultra-low latency is needed.
+
+Huge Pages:
+
+Enable huge pages:
+
+
+echo 2048 | sudo tee /proc/sys/vm/nr_hugepages
+NUMA Optimization:
+
+Bind kdb+ to specific CPUs and memory nodes for optimal performance on NUMA systems.
+
